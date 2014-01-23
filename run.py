@@ -13,7 +13,7 @@ def prepare(fn_dump):
             fn = fn.decode('gbk')
             name = ' '.join(fn[:-4].split('_'))
             print name
-            arr = np.loadtxt(os.path.join(dir_results, fn))
+            arr = np.loadtxt(os.path.join(dir_results, fn), np.int)
 
             precisions = []
             for i in xrange(1000):
@@ -21,7 +21,7 @@ def prepare(fn_dump):
                 truth_num = 0
                 total_precision = 0
                 for j in xrange(1000):
-                    if arr[i, j] == truth:
+                    if arr[i, j] / 100 == truth:
                         truth_num += 1
                         total_precision += truth_num / float(j+1)
                 precisions.append(total_precision / float(truth_num))
@@ -69,6 +69,8 @@ def output_bar(start, num, fn_html):
               ],
               xkey: 'group',axes:false,
               ykeys: ['ap'],
+              ymin: 0,
+              ymax: 1,
               hideHover: 'auto',
               labels: ['mAP - %d.jpg'],
             });
