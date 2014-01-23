@@ -35,6 +35,79 @@ def prepare(fn_dump):
 with open(fn_dump, 'rb') as f:
     arrs = pickle.load(f)
 
+
+
+def html_template(nav, title, stat, script):
+    html = '''
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <title>DIP Final Project</title>
+        <link href="bootstrap.min.css" rel="stylesheet">
+        <link rel='stylesheet' href='morris.min.css'>
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+        <style type="text/css">
+            body {min-height: 2000px; padding-top: 70px;}
+            .morris-hover{position:absolute;z-index:1000;}
+            .morris-hover.morris-default-style{border-radius:10px;padding:6px;
+                color:#666;background:rgba(255, 255, 255, 0.8);
+                border:solid 2px rgba(230, 230, 230, 0.8);
+                font-family:sans-serif;font-size:12px;text-align:center;}
+            .morris-hover.morris-default-style .morris-hover-row-label{font-weight:bold;margin:0.25em 0;}
+            .morris-hover.morris-default-style .morris-hover-point{white-space:nowrap;margin:0.1em 0;}
+        </style>
+      </head>
+      <body>
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="index.html">DIP Final Project</a>
+            </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">
+                %s
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+
+
+        <div class="container">
+          <div class="jumbotron">
+            <h1>%s</h1>
+            <div id='graph' style='height: 300px'></div>
+          </div>
+          %s
+          <div class="footer">
+            <p>&copy; DIP 2013</p>
+          </div>
+        </div>
+
+        <script src='jquery.min.js'></script>
+        <script src='raphael-min.js'></script>
+        <script src='morris.min.js'></script>
+        <script type="text/javascript">
+          %s
+        </script>
+      </body>
+    </html>
+    ''' % (nav, title, stat, script)
+    return html
+
 def output_subpage(start, num):
     nav = []
     for i in xrange(0, 1000, num):
@@ -116,75 +189,8 @@ def output_subpage(start, num):
                         name, ap) for name, ap in infos[::-1]]),
                     target))
 
-    html = '''
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="">
-        <meta name="author" content="">
-        <title>DIP Final Project</title>
-        <link href="bootstrap.min.css" rel="stylesheet">
-        <link rel='stylesheet' href='morris.min.css'>
-        <!--[if lt IE 9]>
-          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-        <![endif]-->
-        <style type="text/css">
-            body {min-height: 2000px; padding-top: 70px;}
-            .morris-hover{position:absolute;z-index:1000;}
-            .morris-hover.morris-default-style{border-radius:10px;padding:6px;
-                color:#666;background:rgba(255, 255, 255, 0.8);
-                border:solid 2px rgba(230, 230, 230, 0.8);
-                font-family:sans-serif;font-size:12px;text-align:center;}
-            .morris-hover.morris-default-style .morris-hover-row-label{font-weight:bold;margin:0.25em 0;}
-            .morris-hover.morris-default-style .morris-hover-point{white-space:nowrap;margin:0.1em 0;}
-        </style>
-      </head>
-      <body>
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-          <div class="container">
-            <div class="navbar-header">
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="index.html">DIP Final Project</a>
-            </div>
-            <div class="navbar-collapse collapse">
-              <ul class="nav navbar-nav">
-                %s
-              </ul>
-            </div><!--/.nav-collapse -->
-          </div>
-        </div>
-
-
-        <div class="container">
-          <div class="jumbotron">
-            <h1>%d - %d</h1>
-            <div id='graph' style='height: 300px'></div>
-          </div>
-          %s
-          <div class="footer">
-            <p>&copy; DIP 2013</p>
-          </div>
-        </div>
-
-        <script src='jquery.min.js'></script>
-        <script src='raphael-min.js'></script>
-        <script src='morris.min.js'></script>
-        <script type="text/javascript">
-          %s
-        </script>
-      </body>
-    </html>
-    ''' % (''.join(nav), start, start+num-1, '\n'.join(stat), '\n'.join(script))
-    return html
+    return html_template(''.join(nav), '%d - %d' % (start, start+num-1),
+            '\n'.join(stat), '\n'.join(script))
 
 
 
@@ -221,74 +227,7 @@ def output_homepage(num):
         ''' % ( '\n'.join(["{ group: '%s', ap: '%2.3f' }," % (
                     name, ap) for name, ap in infos[::-1]])))
 
-    html = '''
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="">
-        <meta name="author" content="">
-        <title>DIP Final Project</title>
-        <link href="bootstrap.min.css" rel="stylesheet">
-        <link rel='stylesheet' href='morris.min.css'>
-        <!--[if lt IE 9]>
-          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-        <![endif]-->
-        <style type="text/css">
-            body {min-height: 2000px; padding-top: 70px;}
-            .morris-hover{position:absolute;z-index:1000;}
-            .morris-hover.morris-default-style{border-radius:10px;padding:6px;
-                color:#666;background:rgba(255, 255, 255, 0.8);
-                border:solid 2px rgba(230, 230, 230, 0.8);
-                font-family:sans-serif;font-size:12px;text-align:center;}
-            .morris-hover.morris-default-style .morris-hover-row-label{font-weight:bold;margin:0.25em 0;}
-            .morris-hover.morris-default-style .morris-hover-point{white-space:nowrap;margin:0.1em 0;}
-        </style>
-      </head>
-      <body>
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-          <div class="container">
-            <div class="navbar-header">
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="index.html">DIP Final Project</a>
-            </div>
-            <div class="navbar-collapse collapse">
-              <ul class="nav navbar-nav">
-                %s
-              </ul>
-            </div><!--/.nav-collapse -->
-          </div>
-        </div>
-
-
-        <div class="container">
-          <div class="jumbotron">
-            <h1>All</h1>
-            <div id='graph' style='height: 300px'></div>
-          </div>
-          <div class="footer">
-            <p>&copy; DIP 2013</p>
-          </div>
-        </div>
-
-        <script src='jquery.min.js'></script>
-        <script src='raphael-min.js'></script>
-        <script src='morris.min.js'></script>
-        <script type="text/javascript">
-          %s
-        </script>
-      </body>
-    </html>
-    ''' % (''.join(nav), '\n'.join(script))
-    return html
+    return html_template(''.join(nav), 'mAP', '', '\n'.join(script))
 
 
 with open('var/index.html', 'w') as f:
