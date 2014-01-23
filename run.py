@@ -31,90 +31,97 @@ def prepare(fn_dump):
     with open(fn_dump, 'wb') as f:
         pickle.dump(arrs, f)
 
-prepare(fn_dump)
+# prepare(fn_dump)
 with open(fn_dump, 'rb') as f:
     arrs = pickle.load(f)
-    # for name, precisions in arrs.iteritems():
-    #     print name, precisions[1]
 
+def output_bar(start, num, fn_html):
+    nav = []
+    for i in xrange(0, 1000, num):
+        nav.append('<li%s><a href="%d.html">%d-%d</a></li>' % (' class="active"' if i == start else '', i, i, i+num-1))
 
-def output_line(fn_html = 'var/result.html', start = 5, num_cases = 50):
-    names = arrs.keys()
+    content, script = [], []
+    for target in xrange(start, start+num):
+        infos = []
+        for name in arrs.keys():
+            infos.append((name.encode('utf-8'), arrs[name][target]))
+        infos.sort(key=lambda x: x[1])
 
-    # write to html
+        content.append('''
+            <div class="row stat">
+              <div class="col-lg-4">
+                <h4>%d.jpg</h4>
+                <img src='images/%d.jpg' width='100%%'></img>
+              </div>
+              <div class="col-lg-8">
+                <h4></h4>
+                <div id='graph%d' style='height: 300px'></div>
+              </div>
+            </div>
+            ''' % (target, target, target) )
+
+        script.append('''
+            Morris.Bar({
+              element: 'graph%d',
+              parseTime: false,
+              data: [
+                %s
+              ],
+              xkey: 'group',axes:false,
+              ykeys: ['ap'],
+              hideHover: 'auto',
+              labels: ['mAP - %d.jpg'],
+            });
+            ''' % ( target,
+                    '\n'.join(["{ group: '%s', ap: '%2.3f' }," % (name, ap) for name, ap in infos[::-1]]),
+                    target))
+
+    html = '''
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>DIP</title>
+        <link href="bootstrap.min.css" rel="stylesheet">
+        <link href="style.css" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        <link rel='stylesheet' href='morris.min.css'>
+        <script src='jquery.min.js'></script>
+        <script src='raphael-min.js'></script>
+        <script src='morris.min.js'></script>
+
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <ul class="nav nav-pills pull-right">
+                %s
+            </ul>
+          </div>
+          %s
+          <div class="footer">
+            <p>&copy; DIP 2013</p>
+          </div>
+        </div>
+        <script type="text/javascript">
+          %s
+        </script>
+      </body>
+    </html>
+    ''' % (''.join(nav), '\n'.join(content), '\n'.join(script))
+
     with open(fn_html, 'w') as f:
-        f.write( "<html><head>\n" )
-        f.write( "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>" )
-        f.write( "<link rel='stylesheet' href='morris.min.css'>\n" )
-        f.write( "<script src='jquery.min.js'></script>\n" )
-        f.write( "<script src='raphael-min.js'></script>\n" )
-        f.write( "<script src='morris.min.js'></script>\n" )
-        f.write( "</head><body>\n" )
-        f.write( "<div id='graph' style='text-align:center; height: 360px;'></div>\n" )
-        f.write( "<script type='text/javascript'>\n" )
-        f.write( "Morris.Line({\n" )
-        f.write( "  element: 'graph',\n" )
-        f.write( "  parseTime: false,\n" )
-        f.write( "  data: [\n" )
-        for i in xrange(start, start+num_cases):
-            f.write( "    { query: '%d.png'" % i )
-            for j, name in enumerate(names):
-                f.write( ", ap%d: %2.3f" % (j, arrs[name][i]) )
-            f.write( " },\n" )
-        f.write( "  ],\n" )
-        f.write( "  xkey: 'query',\n" )
-        f.write( "  ykeys: ['ap" + "', 'ap".join([str(x) for x in xrange(len(names))]) + "'],\n" )
-        f.write( "  labels: ['" + "', '".join([name.encode('utf-8') for name in names]) + "']\n" )
-        f.write( "}).on('click', function(i, row){\nconsole.log(i, row);\n});\n" )
-        f.write("</script></body><html>")
-
-def output_bar(start, end, fn_html):
-
-    # write to html
-    with open(fn_html, 'w') as f:
-        f.write( "<html><head>\n" )
-        f.write( "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>" )
-        f.write( "<link rel='stylesheet' href='style.css'>\n" )
-        f.write( "<script src='jquery.min.js'></script>\n" )
-        f.write( "<script src='raphael-min.js'></script>\n" )
-        f.write( "<script src='morris.min.js'></script>\n" )
-        f.write( "</head><body>\n" )
-
-        f.write( "<table style='margin:0 auto;'>\n" )
-        for target in xrange(start, end):
-            infos = []
-            for name in arrs.keys():
-                infos.append((name.encode('utf-8'), arrs[name][target]))
-            infos.sort(key=lambda x: x[1])
-
-            f.write( "<tr>\n" )
-            f.write( "<td style='text-align:right'><img src='images/%d.jpg' width='360px'></img></td>\n" % target )
-            f.write( "<td><div id='graph%d' style='height: 300px'></div></td>\n" % target )
-            f.write( "</tr>\n" )
-        f.write( "</table>\n" )
-
-        for target in xrange(start, end):
-            infos = []
-            for name in arrs.keys():
-                infos.append((name.encode('utf-8'), arrs[name][target]))
-            infos.sort(key=lambda x: x[1])
-
-            f.write( "<script type='text/javascript'>\n" )
-            f.write( "Morris.Bar({\n" )
-            f.write( "  element: 'graph%d',\n" % target )
-            f.write( "  parseTime: false,\n" )
-            f.write( "  data: [\n" )
-            for name, ap in infos[::-1]:
-                f.write( "    { group: '%s', ap: '%2.3f' },\n" % (name, ap) )
-            f.write( "  ],\n" )
-            f.write( "  xkey: 'group',axes:false,\n" )
-            f.write( "  ykeys: ['ap'],\n" )
-            f.write( "  hideHover: 'auto',\n" )
-            f.write( "  labels: ['mAP - %d.png'],\n" % target )
-            f.write( "});\n" )
-            f.write("</script>")
-
-        f.write("</body><html>")
+        f.write(html)
 
 for i in xrange(0, 1000, 100):
-    output_bar(i, i+100, 'var/%d.html' % i)
+    output_bar(i, 100, 'var/%d.html' % i)
