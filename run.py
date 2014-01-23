@@ -92,7 +92,7 @@ def output(start, num):
               </div>
               <div class="col-lg-8">
                 <h4></h4>
-                <div id='graph%d' style='height: 250px'></div>
+                <div id='graph%d' style='height: 360px'></div>
               </div>
             </div>
             ''' % (target, target, target) )
@@ -125,25 +125,23 @@ def output(start, num):
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="">
         <meta name="author" content="">
-
-        <title>DIP</title>
+        <title>DIP Final Project</title>
         <link href="bootstrap.min.css" rel="stylesheet">
+        <link rel='stylesheet' href='morris.min.css'>
         <!--[if lt IE 9]>
           <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
           <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
         <![endif]-->
-
         <style type="text/css">
             body {min-height: 2000px; padding-top: 70px;}
-            .morris-hover{position:absolute;z-index:1000;}.morris-hover.morris-default-style{border-radius:10px;padding:6px;color:#666;background:rgba(255, 255, 255, 0.8);border:solid 2px rgba(230, 230, 230, 0.8);font-family:sans-serif;font-size:12px;text-align:center;}.morris-hover.morris-default-style .morris-hover-row-label{font-weight:bold;margin:0.25em 0;}
+            .morris-hover{position:absolute;z-index:1000;}
+            .morris-hover.morris-default-style{border-radius:10px;padding:6px;
+                color:#666;background:rgba(255, 255, 255, 0.8);
+                border:solid 2px rgba(230, 230, 230, 0.8);
+                font-family:sans-serif;font-size:12px;text-align:center;}
+            .morris-hover.morris-default-style .morris-hover-row-label{font-weight:bold;margin:0.25em 0;}
             .morris-hover.morris-default-style .morris-hover-point{white-space:nowrap;margin:0.1em 0;}
         </style>
-
-        <link rel='stylesheet' href='morris.min.css'>
-        <script src='jquery.min.js'></script>
-        <script src='raphael-min.js'></script>
-        <script src='morris.min.js'></script>
-
       </head>
       <body>
         <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -155,7 +153,7 @@ def output(start, num):
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="#">Project name</a>
+              <a class="navbar-brand" href="#">DIP Final Project</a>
             </div>
             <div class="navbar-collapse collapse">
               <ul class="nav navbar-nav">
@@ -168,14 +166,18 @@ def output(start, num):
 
         <div class="container">
           <div class="jumbotron">
-            <h1>%d.jpg - %d.jpg</h1>
-            <div id='graph' style='height: 250px'></div>
+            <h1>%d - %d</h1>
+            <div id='graph' style='height: 300px'></div>
           </div>
           %s
           <div class="footer">
             <p>&copy; DIP 2013</p>
           </div>
         </div>
+
+        <script src='jquery.min.js'></script>
+        <script src='raphael-min.js'></script>
+        <script src='morris.min.js'></script>
         <script type="text/javascript">
           %s
         </script>
