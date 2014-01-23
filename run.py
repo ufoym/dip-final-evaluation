@@ -55,7 +55,8 @@ def html_template(nav, title, stat, script):
           <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
         <![endif]-->
         <style type="text/css">
-            body {min-height: 2000px; padding-top: 70px;}
+            body {padding-top: 70px;}
+            .stat_image {margin-bottom: 100px;}
             .morris-hover{position:absolute;z-index:1000;}
             .morris-hover.morris-default-style{border-radius:10px;padding:6px;
                 color:#666;background:rgba(255, 255, 255, 0.8);
