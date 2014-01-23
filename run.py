@@ -56,6 +56,7 @@ def html_template(nav, title, stat, script):
         <![endif]-->
         <style type="text/css">
             body {padding-top: 70px;}
+            h1,h2,h3,h4,h5 {font-family: "Microsoft YaHei"}
             .stat_image {margin-bottom: 100px;}
             .morris-hover{position:absolute;z-index:1000;}
             .morris-hover.morris-default-style{border-radius:10px;padding:6px;
@@ -76,7 +77,7 @@ def html_template(nav, title, stat, script):
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="index.html">DIP Final Project</a>
+              <a class="navbar-brand" href="index.html">所有类别</a>
             </div>
             <div class="navbar-collapse collapse">
               <ul class="nav navbar-nav">
@@ -94,7 +95,7 @@ def html_template(nav, title, stat, script):
           </div>
           %s
           <div class="footer">
-            <p>&copy; DIP 2013</p>
+            <p>&copy; DIP课程组 2014</p>
           </div>
         </div>
 
@@ -112,8 +113,8 @@ def html_template(nav, title, stat, script):
 def output_subpage(start, num):
     nav = []
     for i in xrange(0, 1000, num):
-        nav.append('<li%s><a href="%d.html">%d-%d</a></li>' % (
-            ' class="active"' if i == start else '', i, i, i+num-1))
+        nav.append('<li%s><a href="%d.html">类别%d</a></li>' % (
+            ' class="active"' if i == start else '', i/100, i/100))
 
     stat, script = [], []
 
@@ -161,7 +162,7 @@ def output_subpage(start, num):
         stat.append('''
             <div class="row stat_image">
               <div class="col-lg-4">
-                <h4>%d.jpg</h4>
+                <h4>%d.jpg查准率</h4>
                 <img src='images/%d.jpg' width='100%%'></img>
               </div>
               <div class="col-lg-8">
@@ -190,7 +191,7 @@ def output_subpage(start, num):
                         name, ap) for name, ap in infos[::-1]]),
                     target))
 
-    return html_template(''.join(nav), '%d - %d' % (start, start+num-1),
+    return html_template(''.join(nav), u'类别%d平均查准率'.encode('utf-8') % (start / 100),
             '\n'.join(stat), '\n'.join(script))
 
 
@@ -198,7 +199,7 @@ def output_subpage(start, num):
 def output_homepage(num):
     nav = []
     for i in xrange(0, 1000, num):
-        nav.append('<li><a href="%d.html">%d-%d</a></li>' % (i, i, i+num-1))
+        nav.append('<li><a href="%d.html">类别%d</a></li>' % (i/100, i/100))
 
     stat, script = [], []
 
@@ -228,12 +229,12 @@ def output_homepage(num):
         ''' % ( '\n'.join(["{ group: '%s', ap: '%2.3f' }," % (
                     name, ap) for name, ap in infos[::-1]])))
 
-    return html_template(''.join(nav), 'mAP', '', '\n'.join(script))
+    return html_template(''.join(nav), u'所有类别平均查准率'.encode('utf-8'), '', '\n'.join(script))
 
 
 with open('var/index.html', 'w') as f:
     f.write(output_homepage(100))
 
 for i in xrange(0, 1000, 100):
-    with open('var/%d.html' % i, 'w') as f:
+    with open('var/%d.html' % (i/100), 'w') as f:
         f.write(output_subpage(i, 100))
