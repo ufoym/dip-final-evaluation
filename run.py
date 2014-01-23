@@ -37,7 +37,7 @@ with open(fn_dump, 'rb') as f:
 
 
 
-def html_template(nav, title, stat, script):
+def html_template(nav, title, intro, stat, script):
     html = '''
     <!DOCTYPE html>
     <html>
@@ -56,7 +56,7 @@ def html_template(nav, title, stat, script):
         <![endif]-->
         <style type="text/css">
             body {padding-top: 70px;}
-            h1,h2,h3,h4,h5 {font-family: "Microsoft YaHei"}
+            h1,h2,h3,h4,h5,p {font-family: "Microsoft YaHei"}
             .stat_image {margin-bottom: 100px;}
             .morris-hover{position:absolute;z-index:1000;}
             .morris-hover.morris-default-style{border-radius:10px;padding:6px;
@@ -91,6 +91,7 @@ def html_template(nav, title, stat, script):
         <div class="container">
           <div class="jumbotron">
             <h1>%s</h1>
+            <p>%s</p>
             <div id='graph' style='height: 300px'></div>
           </div>
           %s
@@ -107,7 +108,7 @@ def html_template(nav, title, stat, script):
         </script>
       </body>
     </html>
-    ''' % (nav, title, stat, script)
+    ''' % (nav, title, intro, stat, script)
     return html
 
 def output_subpage(start, num):
@@ -143,7 +144,7 @@ def output_subpage(start, num):
           ymin: 0,
           ymax: 1,
           hideHover: 'auto',
-          labels: ['mAP - Class %d'],
+          labels: ['类别%d的平均查准率'],
         });
         ''' % ( '\n'.join(["{ group: '%s', ap: '%2.3f' }," % (
                     name, ap) for name, ap in infos[::-1]]),
@@ -184,15 +185,21 @@ def output_subpage(start, num):
               ymin: 0,
               ymax: 1,
               hideHover: 'auto',
-              labels: ['AP - %d.jpg'],
+              labels: ['%d.jpg的查准率'],
             });
             ''' % ( target,
                     '\n'.join(["{ group: '%s', ap: '%2.3f' }," % (
                         name, ap) for name, ap in infos[::-1]]),
                     target))
 
-    return html_template(''.join(nav), u'类别%d平均查准率'.encode('utf-8') % (start / 100),
-            '\n'.join(stat), '\n'.join(script))
+    return html_template(
+        ''.join(nav),
+        u'类别%d平均查准率'.encode('utf-8') % (start / 100),
+        u'以下为每个小组查询类别%d的图像（%d.jpg - %d.jpg）的平均查准率。'
+        u'<br/>下方为每个小组查询该类别下单张图的查准率。'.encode('utf-8') % (
+            start / 100, start, start+num-1),
+        '\n'.join(stat),
+        '\n'.join(script))
 
 
 
@@ -224,12 +231,19 @@ def output_homepage(num):
           ymin: 0,
           ymax: 1,
           hideHover: 'auto',
-          labels: ['mAP'],
+          labels: ['所有类别平均查准率'],
         });
         ''' % ( '\n'.join(["{ group: '%s', ap: '%2.3f' }," % (
                     name, ap) for name, ap in infos[::-1]])))
 
-    return html_template(''.join(nav), u'所有类别平均查准率'.encode('utf-8'), '', '\n'.join(script))
+    return html_template(
+        ''.join(nav),
+        u'所有类别平均查准率'.encode('utf-8'),
+        u'以下为每个小组查询所有类别的图像（共1000张）的平均查准率（鼠标移在'
+        u'直方图上方会显示具体的小组成员和查准率）。注：顶部导航条可查询每一'
+        u'类别/每张图的查准率。'.encode('utf-8'),
+        '',
+        '\n'.join(script))
 
 
 with open('var/index.html', 'w') as f:
