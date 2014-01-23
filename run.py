@@ -55,7 +55,7 @@ def output_bar(start, num, fn_html):
               </div>
               <div class="col-lg-8">
                 <h4></h4>
-                <div id='graph%d' style='height: 300px'></div>
+                <div id='graph%d' style='height: 250px'></div>
               </div>
             </div>
             ''' % (target, target, target) )
