@@ -35,20 +35,57 @@ def prepare(fn_dump):
 with open(fn_dump, 'rb') as f:
     arrs = pickle.load(f)
 
-def output_bar(start, num, fn_html):
+def output(start, num):
     nav = []
     for i in xrange(0, 1000, num):
-        nav.append('<li%s><a href="%d.html">%d-%d</a></li>' % (' class="active"' if i == start else '', i, i, i+num-1))
+        nav.append('<li%s><a href="%d.html">%d-%d</a></li>' % (
+            ' class="active"' if i == start else '', i, i, i+num-1))
 
-    content, script = [], []
+    stat, script = [], []
+
+    # -------------------------------------------------------------------------
+    # class stat
+
+    infos = []
+    for name in arrs.keys():
+        mAP = 0
+        for target in xrange(start, start+num):
+            mAP += arrs[name][target]
+        mAP /= float(num)
+
+        infos.append((name.encode('utf-8'), mAP))
+    infos.sort(key=lambda x: x[1])
+
+    script.append('''
+        Morris.Bar({
+          element: 'graph',
+          parseTime: false,
+          data: [
+            %s
+          ],
+          xkey: 'group',axes:false,
+          ykeys: ['ap'],
+          ymin: 0,
+          ymax: 1,
+          hideHover: 'auto',
+          labels: ['mAP - Class %d'],
+        });
+        ''' % ( '\n'.join(["{ group: '%s', ap: '%2.3f' }," % (
+                    name, ap) for name, ap in infos[::-1]]),
+                start / 100))
+
+
+    # -------------------------------------------------------------------------
+    # image stat
+
     for target in xrange(start, start+num):
         infos = []
         for name in arrs.keys():
             infos.append((name.encode('utf-8'), arrs[name][target]))
         infos.sort(key=lambda x: x[1])
 
-        content.append('''
-            <div class="row stat">
+        stat.append('''
+            <div class="row stat_image">
               <div class="col-lg-4">
                 <h4>%d.jpg</h4>
                 <img src='images/%d.jpg' width='100%%'></img>
@@ -72,10 +109,11 @@ def output_bar(start, num, fn_html):
               ymin: 0,
               ymax: 1,
               hideHover: 'auto',
-              labels: ['mAP - %d.jpg'],
+              labels: ['AP - %d.jpg'],
             });
             ''' % ( target,
-                    '\n'.join(["{ group: '%s', ap: '%2.3f' }," % (name, ap) for name, ap in infos[::-1]]),
+                    '\n'.join(["{ group: '%s', ap: '%2.3f' }," % (
+                        name, ap) for name, ap in infos[::-1]]),
                     target))
 
     html = '''
@@ -90,12 +128,16 @@ def output_bar(start, num, fn_html):
 
         <title>DIP</title>
         <link href="bootstrap.min.css" rel="stylesheet">
-        <link href="style.css" rel="stylesheet">
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
           <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
           <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
         <![endif]-->
+
+        <style type="text/css">
+            body {min-height: 2000px; padding-top: 70px;}
+            .morris-hover{position:absolute;z-index:1000;}.morris-hover.morris-default-style{border-radius:10px;padding:6px;color:#666;background:rgba(255, 255, 255, 0.8);border:solid 2px rgba(230, 230, 230, 0.8);font-family:sans-serif;font-size:12px;text-align:center;}.morris-hover.morris-default-style .morris-hover-row-label{font-weight:bold;margin:0.25em 0;}
+            .morris-hover.morris-default-style .morris-hover-point{white-space:nowrap;margin:0.1em 0;}
+        </style>
 
         <link rel='stylesheet' href='morris.min.css'>
         <script src='jquery.min.js'></script>
@@ -104,11 +146,30 @@ def output_bar(start, num, fn_html):
 
       </head>
       <body>
-        <div class="container">
-          <div class="header">
-            <ul class="nav nav-pills pull-right">
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">Project name</a>
+            </div>
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">
                 %s
-            </ul>
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+
+
+        <div class="container">
+          <div class="jumbotron">
+            <h1>%d.jpg - %d.jpg</h1>
+            <div id='graph' style='height: 250px'></div>
           </div>
           %s
           <div class="footer">
@@ -120,10 +181,10 @@ def output_bar(start, num, fn_html):
         </script>
       </body>
     </html>
-    ''' % (''.join(nav), '\n'.join(content), '\n'.join(script))
+    ''' % (''.join(nav), start, start+num-1, '\n'.join(stat), '\n'.join(script))
+    return html
 
-    with open(fn_html, 'w') as f:
-        f.write(html)
 
 for i in xrange(0, 1000, 100):
-    output_bar(i, 100, 'var/%d.html' % i)
+    with open('var/%d.html' % i, 'w') as f:
+        f.write(output(i, 100))
